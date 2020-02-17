@@ -3,10 +3,19 @@ from falcon.testing import TestClient
 from grappa import should
 
 
+from echo import app
+
+
+@given('our server is running with env "{name}": "{value}"')
+def step_impl(context, name, value):
+    context.app = app({name: value})
+    context.client = TestClient(context.app)
+
+
 @given("our server is running")
 def our_server_is_running(context):
-    context.app | should.not_be.none
-    context.client | should.not_be.none
+    context.app = app()
+    context.client = TestClient(context.app)
 
 
 @when('we request the endpoint "{endpoint}"')
@@ -47,3 +56,11 @@ def we_get_an_echo_response(context, method):
 def we_get_an_invalid_http_method_response(context):
     context.resp.status_code | should.be.equal.to(405)
     context.resp.text | should.be.empty
+
+
+@then('the response tags include "{name}": "{value}"')
+def the_response_tags_include(context, name, value):
+    with should(context.resp.json):
+        should.have.key("tags").to.be.a(dict)
+    with should(context.resp.json.get("tags")):
+        should.have.key(name).that.should.be.equal.to(value)
