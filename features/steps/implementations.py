@@ -1,3 +1,5 @@
+import json
+
 from behave import given, then, when
 from falcon.testing import TestClient
 from grappa import should
@@ -21,6 +23,13 @@ def our_server_is_running(context):
 @when('we request the endpoint "{endpoint}"')
 def we_get_endpoing(context, endpoint):
     context.resp = context.client.simulate_get(endpoint)
+
+
+@when("we post to a sample endpoint with payload")
+def post_to_sample_endpoint_with_payload(context):
+    context.resp = context.client.simulate_post(
+        "/sample", json=json.loads(context.text)
+    )
 
 
 @then("we get a success json response")
@@ -58,9 +67,9 @@ def we_get_an_invalid_http_method_response(context):
     context.resp.text | should.be.empty
 
 
-@then('the response tags include "{name}": "{value}"')
-def the_response_tags_include(context, name, value):
+@then('response "{field}" includes "{name}": "{value}"')
+def the_response_tags_include(context, field, name, value):
     with should(context.resp.json):
-        should.have.key("tags").to.be.a(dict)
-    with should(context.resp.json.get("tags")):
+        should.have.key(field).to.be.a(dict)
+    with should(context.resp.json.get(field)):
         should.have.key(name).that.should.be.equal.to(value)

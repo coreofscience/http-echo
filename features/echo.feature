@@ -16,7 +16,7 @@ Feature: Echo
     Given our server is running with env "SERVICE_NAME": "sample"
     When we "<method>" to a sample endpoint
     Then we get an echo sample "<method>" response
-    And the response tags include "SERVICE_NAME": "sample"
+    And response "tags" includes "SERVICE_NAME": "sample"
 
     Examples:
     | method |
@@ -24,3 +24,15 @@ Feature: Echo
     | post   |
     | put    |
     | patch  |
+
+  Scenario:
+    Given our server is running with env "SERVICE_NAME": "sample"
+    When we post to a sample endpoint with payload
+      """
+      {
+        "key": "value",
+        "foo": "bar"
+      }
+      """
+    Then response "payload" includes "key": "value"
+    Then response "payload" includes "foo": "bar"
